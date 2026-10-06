@@ -1,0 +1,1 @@
+"""GDDES Django project package."""

@@ -1,0 +1,4 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/fron-end/.venv/bin/python",
+  "python.pythonPath": "${workspaceFolder}/fron-end/.venv/bin/python"
+}
