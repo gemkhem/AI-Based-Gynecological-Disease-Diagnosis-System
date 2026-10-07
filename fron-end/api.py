@@ -8,12 +8,12 @@ GET  /                   → welcome message + API info
 POST /api/register       → user registration
 POST /api/login          → user login
 POST /api/prediction     → disease prediction (ML model)
-POST /api/voice          → speech recognition + translation + review match
 POST /api/model          → algorithm accuracy lookup
 GET  /api/health         → health check
 
 Interactive docs: http://127.0.0.1:8001/docs
 """
+
 
 import os
 import re
@@ -32,21 +32,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 
-# ── Optional libraries ──────────────────────────────────────────────────────
-try:
-    import speech_recognition as sr
-except ImportError:
-    sr = None
 
-try:
-    from googletrans import Translator
-except ImportError:
-    Translator = None
-
-try:
-    from gtts import gTTS
-except ImportError:
-    gTTS = None
 
 try:
     import mysql.connector
@@ -62,20 +48,12 @@ except LookupError:
     nltk.download("punkt_tab", quiet=True)
     stop_words = set(stopwords.words("english"))
 
+
 # ── Paths ────────────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "app.db")
 MODEL_PATH = os.path.join(BASE_DIR, "random_forest_model.joblib")
-CSV_PATH = os.path.join(BASE_DIR, "gynecological_reviews.csv")
-AUDIO_DIR = os.path.join(BASE_DIR, "static", "saves_audio")
 
-# ── Load review dataset ──────────────────────────────────────────────────────
-df_reviews = None
-if os.path.exists(CSV_PATH):
-    try:
-        df_reviews = pd.read_csv(CSV_PATH)
-    except Exception as e:
-        print(f"[WARN] Could not load reviews CSV: {e}")
 
 # ── Database setup ───────────────────────────────────────────────────────────
 mydb = None
@@ -303,59 +281,7 @@ def prediction(body: PredictionRequest):
     return {"prediction": result, "code": int(pred_value)}
 
 
-# ── Voice ─────────────────────────────────────────────────────────────────────
 
-INDIAN_LANGUAGES = {
-    "hi": "Hindi", "bn": "Bengali", "ta": "Tamil", "te": "Telugu",
-    "kn": "Kannada", "ml": "Malayalam", "gu": "Gujarati", "mr": "Marathi",
-    "or": "Odia", "pa": "Punjabi", "as": "Assamese", "sd": "Sindhi",
-    "ur": "Urdu", "ne": "Nepali",
-}
-
-
-@app.post("/api/voice", tags=["Voice"])
-def voice(language: str = Form(...)):
-    if language not in INDIAN_LANGUAGES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Unsupported language code '{language}'. Supported: {list(INDIAN_LANGUAGES)}",
-        )
-    if sr is None:
-        raise HTTPException(status_code=501, detail="SpeechRecognition library not available.")
-    if Translator is None:
-        raise HTTPException(status_code=501, detail="googletrans library not available.")
-
-    recognizer = sr.Recognizer()
-    try:
-        with sr.Microphone() as source:
-            audio = recognizer.listen(source, timeout=5, phrase_time_limit=10)
-        wav_path = os.path.join(BASE_DIR, "input.wav")
-        with open(wav_path, "wb") as f:
-            f.write(audio.get_wav_data())
-        my_text = recognizer.recognize_google(audio, language=f"{language}-IN")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Speech recognition failed: {e}")
-
-    translator = Translator()
-    translated_text = translator.translate(my_text, dest="en").text
-
-    most_similar_review = find_most_similar_review(translated_text, df_reviews)
-
-    audio_url = None
-    if gTTS is not None:
-        translator2 = Translator()
-        translated_back = translator2.translate(str(most_similar_review), dest=language).text
-        os.makedirs(AUDIO_DIR, exist_ok=True)
-        output_path = os.path.join(AUDIO_DIR, "output.mp3")
-        gTTS(text=translated_back, lang=language, slow=True).save(output_path)
-        audio_url = "/static/saves_audio/output.mp3"
-
-    return {
-        "original_text": my_text,
-        "translated_text": translated_text,
-        "most_similar_review": str(most_similar_review),
-        "audio_url": audio_url,
-    }
 
 
 # ── Model accuracy ────────────────────────────────────────────────────────────
