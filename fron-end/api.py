@@ -208,7 +208,6 @@ def root():
             "POST /api/register",
             "POST /api/login",
             "POST /api/prediction",
-            "POST /api/voice",
             "POST /api/model",
             "GET  /api/health",
         ],
