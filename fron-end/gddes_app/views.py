@@ -4,6 +4,7 @@ import joblib
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.contrib.auth.hashers import make_password, check_password
 
 try:
     import mysql.connector
@@ -147,7 +148,8 @@ def register(request):
             return render(request, 'register.html', {'message': "This email address is already registered!"})
 
         query = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
-        values = (name, email, password)
+        hashed_password = make_password(password)
+        values = (name, email, hashed_password)
         executionquery(query, values)
         return render(request, 'login.html', {'message': "Successfully registered! Please sign in."})
 
@@ -165,12 +167,15 @@ def login(request):
         email_data_list = [i[0] for i in email_data]
 
         if email.upper() in email_data_list:
-            query = "SELECT UPPER(password) FROM users WHERE email = %s"
+            query = "SELECT password FROM users WHERE email = %s"
             values = (email,)
             password_data = retrivequery1(query, values)
-            if password_data and password.upper() == password_data[0][0]:
-                request.session['user_email'] = email
-                return render(request, 'home.html')
+            if password_data:
+                stored_password = password_data[0][0]
+                # Check both hashed password and legacy plain-text password
+                if check_password(password, stored_password) or password.upper() == stored_password.upper():
+                    request.session['user_email'] = email
+                    return render(request, 'home.html')
             return render(request, 'login.html', {'message': "Invalid password, please try again."})
 
         return render(request, 'login.html', {'message': "This email address does not exist."})
