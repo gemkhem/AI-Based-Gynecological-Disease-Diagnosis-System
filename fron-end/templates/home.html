@@ -1,45 +1,162 @@
 {% extends 'index.html' %}
 
-{% block extra_styles %}
-<style>
-    body {
-        background-image: url('/static/imgs/Surgeon.jpg');
-        background-size: cover; /* Cover the entire page */
-        background-position: center; /* Center the image */
-        background-repeat: no-repeat; /* Prevent repeating */
-    }
-</style>
-{% endblock %}
-
-
 {% block navbar %}
     <li class="nav-item">
-        <a class="nav-link active" href="{{url_for('home')}}">Home</a>
+        <a class="nav-link nav-link-custom active" href="{{ url_for('home') }}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="{{url_for('model')}}">Model</a>
-  </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{{url_for('prediction')}}">Prediction</a>
+        <a class="nav-link nav-link-custom" href="{{ url_for('prediction') }}">
+            <i class="bi bi-clipboard2-pulse"></i> Diagnostic Screening
+        </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{{url_for('index')}}">Logout</a>
+        <a class="nav-link nav-link-custom" href="{{ url_for('model') }}">
+            <i class="bi bi-cpu"></i> ML Benchmark
+        </a>
+    </li>
+    <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+        <a class="btn btn-outline-danger btn-nav-action py-1 px-3" href="{{ url_for('index') }}">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
     </li>
 {% endblock %}
 
 {% block content %}
-  <div class="page-heading">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-7 align-self-center">
-          <div class="caption  header-text">
-            <div class="line-dec"></div>
-            <h2 style="margin-top: 300px;color: rgb(6, 206, 233);">WELCOME!</em></h2>
-          </div>
-          <h2 style="color: rgb(66, 10, 156);font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;">Gynaecological Disease Diagnosis Expert System</h2>
+<div class="container py-5">
+    <!-- Welcome Header Banner -->
+    <div class="p-4 p-md-5 mb-5 rounded-4 border bg-white shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="health-pill-badge mb-2">
+                    <i class="bi bi-person-check-fill"></i> Authenticated Clinical Portal
+                </span>
+                <h1 class="display-6 fw-bold mb-2 text-slate-900">
+                    Welcome to Your Health Intelligence Dashboard
+                </h1>
+                <p class="text-muted mb-4 lead fs-6">
+                    Access our trained Random Forest diagnosis engine, benchmark classification algorithms, and review curated clinical patient experiences for informed reproductive health decisions.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ url_for('prediction') }}" class="btn btn-primary-health">
+                        <i class="bi bi-clipboard2-pulse-fill"></i> New Diagnostic Screening
+                    </a>
+                    <a href="{{ url_for('model') }}" class="btn btn-outline-health">
+                        <i class="bi bi-bar-chart-line-fill"></i> Model Comparison
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+                <div class="brand-icon-box mx-auto" style="width: 110px; height: 110px; font-size: 3.5rem; border-radius: var(--radius-xl);">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
+    <!-- Core Action Cards -->
+    <div class="row g-4 mb-5">
+        <!-- Diagnosis Card -->
+        <div class="col-md-4">
+            <div class="health-card h-100">
+                <div class="health-card-body d-flex flex-column">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white mb-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);">
+                        <i class="bi bi-clipboard2-pulse fs-4"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">Symptom Diagnosis</h3>
+                    <p class="text-muted small flex-grow-1">
+                        Evaluate 16 gynecological and urinary indicators (micturition, pelvic inflammation, menstrual rhythm, and hyperandrogenism markers).
+                    </p>
+                    <a href="{{ url_for('prediction') }}" class="btn btn-outline-health w-100 mt-3">
+                        Launch Screening <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Comparison Card -->
+        <div class="col-md-4">
+            <div class="health-card h-100">
+                <div class="health-card-body d-flex flex-column">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white mb-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--color-secondary) 0%, #6366f1 100%);">
+                        <i class="bi bi-cpu fs-4"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">Algorithm Benchmarking</h3>
+                    <p class="text-muted small flex-grow-1">
+                        Compare classification accuracy across 5 distinct algorithms including Random Forest (99%), Decision Tree (99%), SVM (74%), and KNN (66%).
+                    </p>
+                    <a href="{{ url_for('model') }}" class="btn btn-outline-health w-100 mt-3">
+                        View Benchmarks <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Intelligence Card -->
+        <div class="col-md-4">
+            <div class="health-card h-100">
+                <div class="health-card-body d-flex flex-column">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white mb-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #059669 0%, var(--color-primary) 100%);">
+                        <i class="bi bi-chat-quote fs-4"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">Clinical Review Guidance</h3>
+                    <p class="text-muted small flex-grow-1">
+                        Review detailed medical condition breakdowns, patient recovery journeys, and antibiotic or hormonal care recommendations in English.
+                    </p>
+                    <a href="{{ url_for('prediction') }}#reviews" class="btn btn-outline-health w-100 mt-3">
+                        Explore Reviews <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clinical Information Overview Cards -->
+    <div class="health-card p-4 p-md-5">
+        <h3 class="h4 fw-bold mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-info-circle text-primary"></i> Rapid Diagnostic Reference
+        </h3>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="p-3 rounded-3 border bg-light h-100">
+                    <span class="badge bg-warning-subtle text-warning-emphasis mb-2 fw-semibold">PCOS Classification</span>
+                    <h4 class="h6 fw-bold">Polycystic Ovary Syndrome</h4>
+                    <p class="small text-muted mb-2">Characterized by ovulatory dysfunction, irregular or skipped menstrual periods, hyperandrogenic signs (acne, hirsutism), and metabolic weight gain.</p>
+                    <ul class="small text-muted ps-3 mb-0">
+                        <li>Irregular or absent menses</li>
+                        <li>Facial hair / androgenic hair growth</li>
+                        <li>Hormonal acne & abdominal adiposity</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-3 rounded-3 border bg-light h-100">
+                    <span class="badge bg-danger-subtle text-danger mb-2 fw-semibold">UTI Classification</span>
+                    <h4 class="h6 fw-bold">Urinary Tract Infection</h4>
+                    <p class="small text-muted mb-2">Bacterial infection of lower/upper urinary tract manifesting as intense burning upon micturition, increased frequency, and bladder/lumbar tenderness.</p>
+                    <ul class="small text-muted ps-3 mb-0">
+                        <li>Urethral burning & dysuria</li>
+                        <li>Urgent urine frequency</li>
+                        <li>Lumbar / pelvic inflammation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-3 rounded-3 border bg-light h-100">
+                    <span class="badge bg-success-subtle text-success mb-2 fw-semibold">Healthy Classification</span>
+                    <h4 class="h6 fw-bold">Normal Physiological Baseline</h4>
+                    <p class="small text-muted mb-2">Symptom questionnaire confirms negative indicators for acute bacterial cystitis or endocrine ovulatory pathology.</p>
+                    <ul class="small text-muted ps-3 mb-0">
+                        <li>Normal urinary flow and comfort</li>
+                        <li>Regular menstrual rhythm</li>
+                        <li>Absence of pelvic tenderness</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

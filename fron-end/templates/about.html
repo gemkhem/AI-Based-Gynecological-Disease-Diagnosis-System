@@ -2,125 +2,168 @@
 
 {% block navbar %}
     <li class="nav-item">
-        <a class="nav-link" href="{{url_for('index')}}">Home</a>
+        <a class="nav-link nav-link-custom" href="{{ url_for('index') }}">
+            <i class="bi bi-house-door"></i> Home
+        </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link active" href="{{url_for('about')}}">About</a>
+        <a class="nav-link nav-link-custom active" href="{{ url_for('about') }}">
+            <i class="bi bi-info-circle"></i> About
+        </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{{url_for('register')}}">Register</a>
+        <a class="nav-link nav-link-custom" href="{{ url_for('login') }}">
+            <i class="bi bi-box-arrow-in-right"></i> Login
+        </a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{{url_for('login')}}">Login</a>
+    <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+        <a class="btn btn-primary-health btn-nav-action" href="{{ url_for('register') }}">
+            <i class="bi bi-person-plus-fill"></i> Get Started
+        </a>
     </li>
 {% endblock %}
 
 {% block content %}
-<section class="about section-padding">s
-    <div class="container">
-        <div class="row">
+<div class="container py-5">
 
-            <div class="col-12 text-center">
-                <h2 class="mb-5">Gynaecological Disease Diagnosis Expert System </h2>
+    <!-- Header Section -->
+    <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="health-pill-badge mb-2">
+            <i class="bi bi-info-circle-fill"></i> Clinical Background
+        </span>
+        <h1 class="fw-bold mb-3 text-slate-900">About the GDDES Healthcare Platform</h1>
+        <p class="text-muted lead fs-6">
+            Bridging machine learning diagnostics with clinical patient experiences to elevate reproductive healthcare awareness, accelerate diagnosis, and eliminate diagnostic ambiguity.
+        </p>
+    </div>
+
+    <!-- Core Pillar Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-4">
+            <div class="health-card h-100 p-4">
+                <div class="rounded-3 d-flex align-items-center justify-content-center text-white mb-3" style="width: 50px; height: 50px; background: var(--color-primary);">
+                    <i class="bi bi-shield-exclamation fs-4"></i>
+                </div>
+                <h3 class="h5 fw-bold mb-2">The Clinical Problem</h3>
+                <p class="text-muted small mb-0">
+                    Gynaecological disorders such as Polycystic Ovary Syndrome (PCOS) and recurrent Urinary Tract Infections (UTI) suffer from chronic diagnostic delays—often taking months to years for confirmed diagnosis. Subjective reporting and symptom overlap frequently lead to misdiagnosis or late therapeutic intervention.
+                </p>
             </div>
+        </div>
 
-            <div class="col-lg-2 col-12 mt-auto mb-auto">
-                <ul class="nav nav-pills mb-5 mx-auto justify-content-center align-items-center" id="pills-tab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Introduction</button>
-                    </li>
-
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-youtube-tab" data-bs-toggle="pill" data-bs-target="#pills-youtube" type="button" role="tab" aria-controls="pills-youtube" aria-selected="true">Statement about the Problem</button>
-                    </li>
-
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-skill-tab" data-bs-toggle="pill" data-bs-target="#pills-skill" type="button" role="tab" aria-controls="pills-skill" aria-selected="false">Objective of the Project</button>
-                    </li>
-                </ul>
+        <div class="col-lg-4">
+            <div class="health-card h-100 p-4">
+                <div class="rounded-3 d-flex align-items-center justify-content-center text-white mb-3" style="width: 50px; height: 50px; background: var(--color-secondary);">
+                    <i class="bi bi-cpu fs-4"></i>
+                </div>
+                <h3 class="h5 fw-bold mb-2">The AI Solution</h3>
+                <p class="text-muted small mb-0">
+                    GDDES introduces an evidence-based clinical decision support system utilizing a trained <strong>Random Forest Classifier</strong> achieving 99% accuracy across 16 critical symptom biomarkers. The model isolates distinct clusters for UTI, PCOS, and healthy physiological baselines in milliseconds.
+                </p>
             </div>
+        </div>
 
-            <div class="col-lg-10 col-12">
-                <div class="tab-content mt-2" id="pills-tabContent">
-                    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+        <div class="col-lg-4">
+            <div class="health-card h-100 p-4">
+                <div class="rounded-3 d-flex align-items-center justify-content-center text-white mb-3" style="width: 50px; height: 50px; background: #059669;">
+                    <i class="bi bi-chat-heart fs-4"></i>
+                </div>
+                <h3 class="h5 fw-bold mb-2">Review & Guidance Focus</h3>
+                <p class="text-muted small mb-0">
+                    Beyond classification, GDDES translates predictions into actionable clinical understanding. Patients receive structured condition explanations, doctor care protocols, and verified real-world patient case reviews in clear English to understand their care pathway.
+                </p>
+            </div>
+        </div>
+    </div>
 
-                        <div class="row">
-                            <div class="col-lg-7 col-12">
-                                <img src="/static/imgs/medic2.jpg" class="img-fluid" alt="">
-                            </div>
+    <!-- The 16 Biomarkers Schema Card -->
+    <div class="health-card p-4 p-md-5 mb-5">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="brand-icon-box" style="width: 48px; height: 48px; font-size: 1.4rem;">
+                <i class="bi bi-list-check"></i>
+            </div>
+            <div>
+                <h3 class="h4 fw-bold mb-0">The 16 Clinical Biomarker Features</h3>
+                <small class="text-muted">The diagnostic matrix utilized by the trained Random Forest ensemble</small>
+            </div>
+        </div>
 
-                            <div class="col-lg-5 col-12">
-                                <div class="d-flex flex-column h-100 ms-lg-4 mt-lg-0 mt-5">
-                                    <h5 class="mb-3">Gynaecological  <span>Disease</span> <br>Diagnosis <span> Expert System</h5>
-
-                                    <p>
-                                        The Gynaecological Disease Diagnosis Expert System (GDDES) uses machine learning and natural language processing to diagnose Urinary Tract Infection (UTI) and Polycystic Ovary Syndrome (PCOS). It combines classical methods </p>
-
-                                    <div class="mt-2 mt-lg-auto">
-                                        <a href="about.html" class="custom-link mb-2">
-                                            Learn more about us
-                                            <i class="bi-arrow-right ms-2"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="pills-youtube" role="tabpanel" aria-labelledby="pills-youtube-tab">
-
-                        <div class="row">
-                            <div class="col-lg-7 col-12">
-                                <div class="ratio ratio-16x9">
-                                    <img src="static\imgs\medic.jpg" title="medic.jpg" class="img-fluid" allowfullscreen></img>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-5 col-12">
-                                <div class="d-flex flex-column h-100 ms-lg-4 mt-lg-0 mt-5">
-                                    <h4 class="mb-3"> Problem Statement </h4>
-
-                                    <p>Current diagnostic methods for gynaecological disorders like UTI and PCOS are subjective and error-prone, relying on traditional machine learning algorithms that lack precision. Enhancing accuracy and efficiency is a challenge. Advanced algorithms and Natural Language Processing (NLP) could improve diagnostic practices.</p>
-                                    <!-- <div class="mt-2 mt-lg-auto">
-                                        <a href="contact.html" class="custom-link mb-2">
-                                            Work with us
-                                            <i class="bi-arrow-right ms-2"></i>
-                                        </a>
-                                    </div> -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="pills-skill" role="tabpanel" aria-labelledby="pills-skill-tab">
-                        <div class="row">
-                            <div class="col-lg-7 col-12">
-                                <img src="static\imgs\Surgeon.jpg" class="img-fluid" alt="">
-                            </div>
-
-                            <div class="col-lg-5 col-12">
-                                <div class="d-flex flex-column h-100 ms-lg-4 mt-lg-0 mt-5">
-                                    <h4 class="mb-3">Objective of the Project</h4>
-
-                                    <p>It will compare traditional and advanced algorithms to improve diagnostic accuracy. The goal is to provide a reliable, data-driven tool for healthcare professionals that reduces errors and diagnostic time.</p>
-
-                                    </div>
-                                    
-                                    <!-- <div class="mt-2 mt-lg-auto">
-                                        <a href="products.html" class="custom-link mb-2">
-                                            Explore products
-                                            <i class="bi-arrow-right ms-2"></i>
-                                        </a>
-                                    </div> -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h4 class="h6 fw-bold text-danger mb-2"><i class="bi bi-droplet-half me-1"></i> Urinary & Nephrology</h4>
+                    <ul class="small text-muted ps-3 mb-0">
+                        <li>Urine Pushing / Frequency Urge</li>
+                        <li>Micturition Pain (Dysuria)</li>
+                        <li>Burning Sensation of Urethra</li>
+                        <li>Swelling of Urethral Outlet</li>
+                        <li>Bladder Inflammation</li>
+                        <li>Nephritis of Renal Pelvis Origin</li>
+                    </ul>
                 </div>
             </div>
 
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h4 class="h6 fw-bold text-warning mb-2"><i class="bi bi-flower1 me-1"></i> Endocrine & Ovarian (PCOS)</h4>
+                    <ul class="small text-muted ps-3 mb-0">
+                        <li>Irregular Menstrual Cycles</li>
+                        <li>Amenorrhea (No Periods)</li>
+                        <li>Hirsutism (Excessive Hair Growth)</li>
+                        <li>Central Abdominal Adiposity</li>
+                        <li>Scalp Hair Thinning / Alopecia</li>
+                        <li>Persistent Hormonal Acne</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h4 class="h6 fw-bold text-teal mb-2" style="color: var(--color-primary);"><i class="bi bi-activity me-1"></i> Somatic Pain & Discomfort</h4>
+                    <ul class="small text-muted ps-3 mb-0">
+                        <li>General Nausea / Queasiness</li>
+                        <li>Lumbar (Lower Back) Pain</li>
+                        <li>Buttocks / Deep Pelvic Pain</li>
+                        <li>Genital Pruritus / Itching</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
-</section>
+
+    <!-- Technology Architecture Grid -->
+    <div class="health-card p-4 p-md-5">
+        <h3 class="h4 fw-bold mb-4">Underlying Technology Stack</h3>
+        <div class="row g-4">
+            <div class="col-sm-6 col-md-3">
+                <div class="border rounded-3 p-3 text-center bg-white">
+                    <i class="bi bi-filetype-py fs-2 text-primary"></i>
+                    <h4 class="h6 fw-bold mt-2 mb-1">Django 4.2</h4>
+                    <small class="text-muted">Web Application Framework</small>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="border rounded-3 p-3 text-center bg-white">
+                    <i class="bi bi-boxes fs-2 text-success"></i>
+                    <h4 class="h6 fw-bold mt-2 mb-1">Scikit-Learn</h4>
+                    <small class="text-muted">Random Forest Ensemble</small>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="border rounded-3 p-3 text-center bg-white">
+                    <i class="bi bi-database fs-2 text-info"></i>
+                    <h4 class="h6 fw-bold mt-2 mb-1">SQLite & MySQL</h4>
+                    <small class="text-muted">Relational Storage Layer</small>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="border rounded-3 p-3 text-center bg-white">
+                    <i class="bi bi-bootstrap fs-2 text-purple" style="color: #6f42c1;"></i>
+                    <h4 class="h6 fw-bold mt-2 mb-1">Modern UI & Jinja2</h4>
+                    <small class="text-muted">Responsive Medical Design</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
