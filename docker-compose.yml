@@ -1,0 +1,55 @@
+services:
+  # ─── GDDES Django Web Application ───────────────────────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gddes-web-app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-gddes-analysis-key-for-local-development}
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-True}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost,0.0.0.0,web}
+      - MYSQL_HOST=${MYSQL_HOST:-}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-db}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+    volumes:
+      # Live reload development mounts
+      - .:/app
+      # Preserve container virtual files / avoid overwriting installed packages
+      - /app/.venv
+    # Development command: Django auto-reloader on 0.0.0.0:8000
+    # For production: override command with gunicorn --bind 0.0.0.0:8000 ...
+    command: python manage.py runserver 0.0.0.0:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ─── Optional MySQL Database (Uncomment if needed) ──────────────────────────
+  # db:
+  #   image: mysql:8.0
+  #   container_name: gddes-mysql-db
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_DATABASE: db
+  #     MYSQL_ROOT_PASSWORD: rootpassword
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #     - ./fron-end/templates/db.sql:/docker-entrypoint-initdb.d/init.sql
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+# volumes:
+#   mysql_data:

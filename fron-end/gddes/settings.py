@@ -1,14 +1,28 @@
+"""
+Django settings for Gynaecological Disease Diagnosis Expert System (GDDES).
+Configured for development, Docker containers, and production deployment.
+"""
+
 from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-gddes-analysis-key-for-local-development'
+# Security Settings
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-gddes-analysis-key-for-local-development-and-docker'
+)
 
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0,*').split(',')
+    if host.strip()
+]
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -60,6 +74,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gddes.wsgi.application'
 
+# Database
+# Default to SQLite; seamlessly fallback or switch to external DB via environment
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -69,14 +85,17 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = []
 
+# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -1,30 +1,55 @@
 import os
 import sqlite3
 import joblib
-import mysql.connector
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+
+try:
+    import mysql.connector
+except ImportError:
+    mysql = None
 
 BASE_DIR = settings.BASE_DIR
 DB_PATH = os.path.join(BASE_DIR, 'app.db')
 MODEL_PATH = os.path.join(BASE_DIR, 'random_forest_model.joblib')
 
+# In-memory cached model reference to avoid reloading 10MB pickle on every request
+_MODEL_CACHE = None
+
+
+def get_model():
+    """Lazily load and cache the Random Forest model in memory."""
+    global _MODEL_CACHE
+    if _MODEL_CACHE is None:
+        if os.path.exists(MODEL_PATH):
+            _MODEL_CACHE = joblib.load(MODEL_PATH)
+        else:
+            # Fallback path if running from root without inner model duplicate
+            alt_path = os.path.join(os.path.dirname(BASE_DIR), 'backend', 'random_forest_model.joblib')
+            if os.path.exists(alt_path):
+                _MODEL_CACHE = joblib.load(alt_path)
+            else:
+                raise FileNotFoundError(f"Trained Random Forest model not found at {MODEL_PATH}")
+    return _MODEL_CACHE
+
+
 mydb = None
 mycursor = None
 
-try:
-    mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        port="3306",
-        database='db'
-    )
-    mycursor = mydb.cursor()
-except Exception:
-    mydb = None
-    mycursor = None
+if mysql is not None:
+    try:
+        mydb = mysql.connector.connect(
+            host=os.getenv("MYSQL_HOST", "localhost"),
+            user=os.getenv("MYSQL_USER", "root"),
+            password=os.getenv("MYSQL_PASSWORD", ""),
+            port=os.getenv("MYSQL_PORT", "3306"),
+            database=os.getenv("MYSQL_DATABASE", "db"),
+        )
+        mycursor = mydb.cursor()
+    except Exception:
+        mydb = None
+        mycursor = None
 
 
 def sqlite_connect():
@@ -37,9 +62,16 @@ def sqlite_query(query):
     return query.replace('%s', '?')
 
 
-# Ensure users table exists in sqlite fallback
+# Ensure users table exists in SQLite fallback
 conn = sqlite_connect()
-conn.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT)")
+conn.execute(
+    """CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT UNIQUE,
+        password TEXT
+    )"""
+)
 conn.commit()
 conn.close()
 
@@ -84,6 +116,8 @@ def retrivequery2(query):
     return [tuple(row) for row in data]
 
 
+# ─── Application Views ────────────────────────────────────────────────────────
+
 @csrf_exempt
 def index(request):
     return render(request, 'index.html')
@@ -97,28 +131,33 @@ def about(request):
 @csrf_exempt
 def register(request):
     if request.method == "POST":
-        email = request.POST.get('email', '')
-        name = request.POST.get('name', '')
+        email = request.POST.get('email', '').strip()
+        name = request.POST.get('name', '').strip()
         password = request.POST.get('password', '')
         c_password = request.POST.get('c_password', '')
-        if password == c_password:
-            query = "SELECT UPPER(email) FROM users"
-            email_data = retrivequery2(query)
-            email_data_list = [i[0] for i in email_data]
-            if email.upper() not in email_data_list:
-                query = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
-                values = (name, email, password)
-                executionquery(query, values)
-                return render(request, 'login.html', {'message': "Successfully Registered!"})
-            return render(request, 'register.html', {'message': "This email ID is already exists!"})
-        return render(request, 'register.html', {'message': "Conform password is not match!"})
+
+        if password != c_password:
+            return render(request, 'register.html', {'message': "Confirm password does not match!"})
+
+        query = "SELECT UPPER(email) FROM users"
+        email_data = retrivequery2(query)
+        email_data_list = [i[0] for i in email_data]
+
+        if email.upper() in email_data_list:
+            return render(request, 'register.html', {'message': "This email address is already registered!"})
+
+        query = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
+        values = (name, email, password)
+        executionquery(query, values)
+        return render(request, 'login.html', {'message': "Successfully registered! Please sign in."})
+
     return render(request, 'register.html')
 
 
 @csrf_exempt
 def login(request):
     if request.method == "POST":
-        email = request.POST.get('email', '')
+        email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '')
 
         query = "SELECT UPPER(email) FROM users"
@@ -128,12 +167,14 @@ def login(request):
         if email.upper() in email_data_list:
             query = "SELECT UPPER(password) FROM users WHERE email = %s"
             values = (email,)
-            password__data = retrivequery1(query, values)
-            if password__data and password.upper() == password__data[0][0]:
+            password_data = retrivequery1(query, values)
+            if password_data and password.upper() == password_data[0][0]:
                 request.session['user_email'] = email
                 return render(request, 'home.html')
-            return render(request, 'login.html', {'message': "Invalid Password!!"})
-        return render(request, 'login.html', {'message': "This email ID does not exist!"})
+            return render(request, 'login.html', {'message': "Invalid password, please try again."})
+
+        return render(request, 'login.html', {'message': "This email address does not exist."})
+
     return render(request, 'login.html')
 
 
@@ -146,36 +187,35 @@ def home(request):
 def prediction(request):
     if request.method == "POST":
         try:
-            Nausea = int(request.POST['Nausea'])
-            Lumber = int(request.POST['Lumber'])
-            Urine = int(request.POST['Urine'])
-            Micturition = int(request.POST['Micturition'])
-            Urethra = int(request.POST['Urethra'])
-            Itch = int(request.POST['Itch'])
-            Swelling = int(request.POST['Swelling'])
-            Inflammation = int(request.POST['Inflammation'])
-            Nephritis = int(request.POST['Nephritis'])
-            Irregular = int(request.POST['Irregular'])
-            No_Periods = int(request.POST['No_Periods'])
-            Excessive_Hair_Growth = int(request.POST['Excessive_Hair_Growth'])
-            Buttocks = int(request.POST['Buttocks'])
-            Belly_Fat = int(request.POST['Belly_Fat'])
-            Hair_Loss = int(request.POST['Hair_Loss'])
-            Acne = int(request.POST['Acne'])
+            nausea = int(request.POST.get('Nausea', 0))
+            lumber = int(request.POST.get('Lumber', 0))
+            urine = int(request.POST.get('Urine', 0))
+            micturition = int(request.POST.get('Micturition', 0))
+            urethra = int(request.POST.get('Urethra', 0))
+            itch = int(request.POST.get('Itch', 0))
+            swelling = int(request.POST.get('Swelling', 0))
+            inflammation = int(request.POST.get('Inflammation', 0))
+            nephritis = int(request.POST.get('Nephritis', 0))
+            irregular = int(request.POST.get('Irregular', 0))
+            no_periods = int(request.POST.get('No_Periods', 0))
+            excessive_hair = int(request.POST.get('Excessive_Hair_Growth', 0))
+            buttocks = int(request.POST.get('Buttocks', 0))
+            belly_fat = int(request.POST.get('Belly_Fat', 0))
+            hair_loss = int(request.POST.get('Hair_Loss', 0))
+            acne = int(request.POST.get('Acne', 0))
 
-            lee = [[Nausea, Lumber, Urine, Micturition, Urethra, Itch, Swelling, Inflammation,
-                    Nephritis, Irregular, No_Periods, Excessive_Hair_Growth, Buttocks, Belly_Fat,
-                    Hair_Loss, Acne]]
+            feature_vector = [[
+                nausea, lumber, urine, micturition, urethra, itch, swelling, inflammation,
+                nephritis, irregular, no_periods, excessive_hair, buttocks, belly_fat,
+                hair_loss, acne
+            ]]
 
-            model = joblib.load(MODEL_PATH)
-            predictions = model.predict(lee)
+            model = get_model()
+            predictions = model.predict(feature_vector)
 
-            if predictions[0] == 0:
-                result = 'Healthy'
-            elif predictions[0] == 1:
-                result = 'PCOS'
-            else:
-                result = 'UTI'
+            result_map = {0: 'Healthy', 1: 'PCOS', 2: 'UTI'}
+            result = result_map.get(int(predictions[0]), 'Healthy')
+
             return render(request, 'Prediction.html', {'result': result})
         except Exception as e:
             return render(request, 'Prediction.html', {'result': f'Error in prediction: {str(e)}'})
@@ -183,28 +223,21 @@ def prediction(request):
     return render(request, 'Prediction.html')
 
 
-
 @csrf_exempt
 def model_view(request):
     if request.method == 'POST':
         algorithms = request.POST.get("algo")
-        accuracy = 0
-        msg = ""
-        if algorithms == "1":
-            accuracy = 99
-            msg = 'Accuracy  for DecisionTree Classifier is ' + str(accuracy) + '%'
-        elif algorithms == "2":
-            accuracy = 99
-            msg = 'Accuracy  for RandomForestClassifier is ' + str(accuracy) + '%'
-        elif algorithms == "3":
-            accuracy = 74
-            msg = 'Accuracy  for Support Vector Machine(SVM) is ' + str(accuracy) + '%'
-        elif algorithms == "4":
-            accuracy = 66
-            msg = 'Accuracy  for KNeighborsClassifier is ' + str(accuracy) + '%'
-        elif algorithms == "5":
-            accuracy = 67
-            msg = 'Accuracy  for GradientBoostingClassifier is ' + str(accuracy) + '%'
+        accuracy_map = {
+            "1": ("DecisionTree Classifier", 99),
+            "2": ("RandomForestClassifier", 99),
+            "3": ("Support Vector Machine (SVM)", 74),
+            "4": ("KNeighborsClassifier", 66),
+            "5": ("GradientBoostingClassifier", 67),
+        }
+
+        entry = accuracy_map.get(algorithms, ("RandomForestClassifier", 99))
+        name, accuracy = entry
+        msg = f"Accuracy for {name} is {accuracy}%"
 
         return render(request, 'model.html', {'msg': msg, 'accuracy': accuracy})
 
