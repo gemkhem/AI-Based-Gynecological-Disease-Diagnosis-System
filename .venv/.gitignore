@@ -1,0 +1,20 @@
+*# Virtual environments
+.venv/
+env/
+venv/
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS
+.DS_Store
+
+# Databases
+*.sqlite3
+
+# Audio / temporary artifacts
+fron-end/static/saves_audio/
+input.wav
+output.mp3
